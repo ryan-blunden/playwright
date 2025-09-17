@@ -17,6 +17,7 @@
 import { ProgramOption } from 'playwright-core/lib/utilsBundle';
 import * as mcpServer from './sdk/server';
 import { commaSeparatedList, dotenvFileLoader, headerParser, numberParser, resolveCLIConfig, semicolonSeparatedList } from './browser/config';
+import { browserTools, filteredTools } from './browser/tools';
 import { setupExitWatchdog } from './browser/watchdog';
 import { contextFactory } from './browser/browserContextFactory';
 import { ProxyBackend } from './sdk/proxyBackend';
@@ -28,11 +29,16 @@ import type { Command } from 'playwright-core/lib/utilsBundle';
 import type { MCPProvider } from './sdk/proxyBackend';
 
 export function decorateCommand(command: Command, version: string) {
+  // Build tools list string
+  const allCapabilities = Array.from(new Set(browserTools.map(t => t.capability)));
+  const tools = filteredTools({ capabilities: allCapabilities, tools: [] } as any).map(t => t.schema.name).join('\n');
+
   command.option('--allowed-origins <origins>', 'semicolon-separated list of origins to allow the browser to request. Default is to allow all.', semicolonSeparatedList)
       .option('--blocked-origins <origins>', 'semicolon-separated list of origins to block the browser from requesting. Blocklist is evaluated before allowlist. If used without the allowlist, requests not matching the blocklist are still allowed.', semicolonSeparatedList)
       .option('--block-service-workers', 'block service workers')
       .option('--browser <browser>', 'browser or chrome channel to use, possible values: chrome, firefox, webkit, msedge.')
       .option('--caps <caps>', 'comma-separated list of additional capabilities to enable, possible values: vision, pdf.', commaSeparatedList)
+      .option('--tools <tools>', `comma-separated list of tools to enable. Defeats '--caps <caps>'. Available tools:\n${tools}`, commaSeparatedList)
       .option('--cdp-endpoint <endpoint>', 'CDP endpoint to connect to.')
       .option('--cdp-header <headers...>', 'CDP headers to send with the connect request, multiple can be specified.', headerParser)
       .option('--config <path>', 'path to the configuration file.')
@@ -63,6 +69,10 @@ export function decorateCommand(command: Command, version: string) {
       .addOption(new ProgramOption('--vscode', 'VS Code tools.').hideHelp())
       .addOption(new ProgramOption('--vision', 'Legacy option, use --caps=vision instead').hideHelp())
       .action(async options => {
+        // Exit early if help was requested
+        if (options.help)
+          return;
+
         setupExitWatchdog();
 
         if (options.vision) {

@@ -91,6 +91,11 @@ export type Config = {
   capabilities?: ToolCapability[];
 
   /**
+   * List of enabled tools by name. If specified, only these tools will be available.
+   */
+  tools?: string[];
+
+  /**
    * Whether to save the Playwright session into the output directory.
    */
   saveSession?: boolean;

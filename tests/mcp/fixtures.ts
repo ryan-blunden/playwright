@@ -77,7 +77,7 @@ export const test = serverTest.extend<TestFixtures & TestOptions, WorkerFixtures
   },
 
   startClient: async ({ mcpHeadless, mcpBrowser, mcpArgs, mcpServerType }, use, testInfo) => {
-    const configDir = path.dirname(test.info().config.configFile!);
+    const configDir = test.info().config.configFile ? path.dirname(test.info().config.configFile) : test.info().config.rootDir;
     const clients: Client[] = [];
 
     await use(async options => {

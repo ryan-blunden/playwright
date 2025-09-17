@@ -58,5 +58,9 @@ export const browserTools: Tool<any>[] = [
 ];
 
 export function filteredTools(config: FullConfig) {
-  return browserTools.filter(tool => tool.capability.startsWith('core') || config.capabilities?.includes(tool.capability));
+  let tools = browserTools.filter(tool => tool.capability.startsWith('core') || config.capabilities?.includes(tool.capability));
+  if (config.tools && config.tools.length > 0)
+    tools = tools.filter(tool => config.tools!.includes(tool.schema.name));
+
+  return tools;
 }

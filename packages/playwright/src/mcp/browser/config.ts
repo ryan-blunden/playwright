@@ -55,6 +55,7 @@ export type CLIOptions = {
   storageState?: string;
   timeoutAction?: number;
   timeoutNavigation?: number;
+  tools?: string[];
   userAgent?: string;
   userDataDir?: string;
   viewportSize?: string;
@@ -205,7 +206,7 @@ export function configFromCLIOptions(cliOptions: CLIOptions): Config {
       host: cliOptions.host,
     },
     capabilities: cliOptions.caps as ToolCapability[],
-    network: {
+    tools: cliOptions.tools as string[],    network: {
       allowedOrigins: cliOptions.allowedOrigins,
       blockedOrigins: cliOptions.blockedOrigins,
     },
